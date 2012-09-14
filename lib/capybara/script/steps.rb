@@ -41,6 +41,41 @@ module Capybara
           session.visit params[:url]
         end
       end
+      
+      class DOMAction < Action
+        def run
+          begin
+            if scope = params.delete(:within) 
+              session.within(scope) { do_run() } 
+            else 
+              do_run() 
+            end
+          rescue Capybara::ElementNotFound => ex
+            ap ex
+            false
+          end
+        end
+
+        def do_run
+          raise "do_run must be defined on child"
+        end
+      end
+
+      class FillIn < DOMAction
+        register_step
+
+        def do_run
+          @session.fill_in params[:selector], :with => params[:value]
+        end
+      end
+
+      class ClickOn < DOMAction
+        register_step
+
+        def do_run
+          @session.click_on params[:selector]
+        end
+      end
     end
   end
 end
