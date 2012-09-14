@@ -1,0 +1,1 @@
+Run Capybara sessions via a serializable list of steps
