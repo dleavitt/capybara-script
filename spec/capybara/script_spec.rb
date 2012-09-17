@@ -3,7 +3,22 @@ require "spec_helper"
 describe Capybara::Script do
   describe "callbacks" do
     before do
-      @script = Capybara::Script.new([[:visit, {:url => "http://www.google.com/"}]])
+      class TestScript < Capybara::Script
+        set_callback :script, :around,  :around_script
+        set_callback :step,   :around,  :around_step
+        
+        def around_script
+          yield
+        end
+        
+        def around_step
+          yield
+        end
+      end
+      
+      @script = TestScript.new([[:visit, {:url => "http://www.google.com/"}]])
+      
+      
     end
     
     it "calls the script callback" do
@@ -12,6 +27,12 @@ describe Capybara::Script do
       end
       
       @script.class.set_callback :script, :after do
+        step.should == steps[-1]
+      end
+      
+      @script.class.set_callback :script, :around do |&block|
+        step.should == nil
+        block.yield
         step.should == steps[-1]
       end
       
@@ -24,9 +45,15 @@ describe Capybara::Script do
         step.should == steps[0]
       end
       
-      @script.class.set_callback :script, :after do
+      @script.class.set_callback :step, :after do
         session.current_url.should == "http://www.google.com/"
         step.should == steps[0]
+      end
+      
+      @script.class.set_callback :step, :around do |&block|
+        session.current_url.should == ""
+        block.yield
+        session.current_url.should == "http://www.google.com/"
       end
       
       @script.run

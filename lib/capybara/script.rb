@@ -24,9 +24,7 @@ module Capybara
         steps.each.with_index do |step, index|
           self.step = step
           self.step_index = index
-          run_callbacks :step do
-            @step.run
-          end
+          run_callbacks(:step) { @step.run }
         end
       end
     end
