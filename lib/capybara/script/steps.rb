@@ -1,5 +1,5 @@
 module Capybara
-  module Script
+  class Script
     module Steps
       def self.definitions
         @step_definitions ||= {}

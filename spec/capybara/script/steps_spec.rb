@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe "Steps" do  
   def run_steps(steps)
-    script = Capybara::Script::Base.new(steps)
+    script = Capybara::Script.new(steps)
     script.run
     script
   end

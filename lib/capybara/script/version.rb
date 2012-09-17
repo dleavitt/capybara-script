@@ -1,5 +1,5 @@
 module Capybara
-  module Script
-    VERSION = "0.0.1"
+  class Script
+    VERSION = "0.0.2"
   end
 end
