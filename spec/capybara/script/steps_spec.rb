@@ -31,7 +31,6 @@ describe "Steps" do
         [:fill_in,    {:selector => "Search", :value => "test", :within => "#form2"}],
         [:click_on,   {:selector => "submit", :within => "#form2"}],
       ]
-      
       script.session.current_url.split('?')[-1].should eq "search=test&formno=2"
     end
   end
