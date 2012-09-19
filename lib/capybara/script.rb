@@ -8,9 +8,9 @@ module Capybara
   class Script
     include ActiveSupport::Callbacks
     
-    attr_accessor :steps, :steps_data, :session, :step, :step_index
+    attr_accessor :steps, :steps_data, :session, :step, :step_index, :error
     
-    define_callbacks :script, :step
+    define_callbacks :script, :step, :cancel
   
     def initialize(step_data)
       @steps_data = step_data
@@ -21,15 +21,20 @@ module Capybara
 
     def run
       run_callbacks :script do
-        steps.each.with_index do |step, index|
-          self.step = step
-          self.step_index = index
-          run_callbacks(:step) { @step.run }
+        begin
+          steps.each.with_index do |step, index|
+            self.step = step
+            self.step_index = index
+            run_callbacks(:step) { @step.run }
+          end
+        rescue Cancel => ex
+          @error = ex
+          run_callbacks :cancel
         end
       end
     end
     
-    class Abort < StandardError
+    class Cancel < StandardError
       
     end
   end

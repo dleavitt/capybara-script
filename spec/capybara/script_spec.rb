@@ -6,6 +6,7 @@ describe Capybara::Script do
       class TestScript < Capybara::Script
         set_callback :script, :around,  :around_script
         set_callback :step,   :around,  :around_step
+        set_callback :cancel, :after,   :after_cancel
         
         def around_script
           yield
@@ -13,6 +14,9 @@ describe Capybara::Script do
         
         def around_step
           yield
+        end
+        
+        def after_cancel
         end
       end
       
@@ -57,6 +61,25 @@ describe Capybara::Script do
       end
       
       @script.run
+    end
+    
+    describe "cancel" do
+      before do
+        @script.class.set_callback :step, :after do
+          raise Capybara::Script::Cancel.new
+        end
+      end
+      
+      it "sets an error on the script" do
+        @script.error.should be_nil
+        @script.run
+        @script.error.should_not be_nil
+      end
+      
+      it "calls the cancel callback" do
+        @script.should_receive(:after_cancel)
+        @script.run
+      end
     end
   end
 end
