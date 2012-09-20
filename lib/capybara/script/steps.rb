@@ -76,6 +76,14 @@ module Capybara
           @session.click_on params[:selector]
         end
       end
+      
+      class Check < DOMAction
+        register_step
+        
+        def do_run
+          @session.check params[:selector]
+        end
+      end
     end
   end
 end

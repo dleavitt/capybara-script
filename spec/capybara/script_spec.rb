@@ -35,4 +35,16 @@ describe "Steps" do
       script.session.current_url.split('?')[-1].should eq "search=test&formno=2"
     end
   end
+  
+  describe Capybara::Script::Steps::Check do
+    it "checks the box" do
+      script = run_steps [
+        [:visit,      {:url => "http://dleavitt-test.s3.amazonaws.com/within_spec.html"}],
+        [:check,      {:selector => "Checkbox Test"}],
+        [:click_on,   {:selector => "submit_checkbox"}],
+      ]
+      
+      script.session.current_url.split('?')[-1].should eq "checkbox_test=1"
+    end
+  end
 end
