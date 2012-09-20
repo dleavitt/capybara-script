@@ -1,5 +1,5 @@
 module Capybara
-  module Script
+  class Script
     module Steps
       def self.definitions
         @step_definitions ||= {}
@@ -51,7 +51,6 @@ module Capybara
               do_run() 
             end
           rescue Capybara::ElementNotFound => ex
-            ap ex
             false
           end
         end

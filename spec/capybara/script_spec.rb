@@ -1,38 +1,85 @@
 require "spec_helper"
 
-describe "Steps" do  
-  def run_steps(steps)
-    script = Capybara::Script::Base.new(steps)
-    script.run
-    script
-  end
-  
-  describe Capybara::Script::Steps::Visit do
-    it "visits google" do
-      script = run_steps([[:visit, {:url => "http://www.google.com"}]])
-      script.session.current_url.should eq "http://www.google.com/"
-    end
-  end
-  
-  describe Capybara::Script::Steps::FillIn do
-    it "fills in a form" do
-      script = run_steps [
-        [:visit,    {:url => "http://en.wikipedia.org/wiki/Main_Page"}],
-        [:fill_in,  {:selector => "search", :value => "test"}]
-      ]
-      script.session.find_field("search").value.should eq "test"
-    end
-  end
-  
-  describe Capybara::Script::Steps::ClickOn do
-    it "clicks links, respects 'within'" do
-      script = run_steps [
-        [:visit,      {:url => "http://dleavitt-test.s3.amazonaws.com/within_spec.html"}],
-        [:fill_in,    {:selector => "Search", :value => "test", :within => "#form2"}],
-        [:click_on,   {:selector => "submit", :within => "#form2"}],
-      ]
+describe Capybara::Script do
+  describe "callbacks" do
+    before do
+      class TestScript < Capybara::Script
+        set_callback :script, :around,  :around_script
+        set_callback :step,   :around,  :around_step
+        set_callback :cancel, :after,   :after_cancel
+        
+        def around_script
+          yield
+        end
+        
+        def around_step
+          yield
+        end
+        
+        def after_cancel
+        end
+      end
       
-      script.session.current_url.split('?')[-1].should eq "search=test&formno=2"
+      @script = TestScript.new([[:visit, {:url => "http://www.google.com/"}]])
+      
+      
+    end
+    
+    it "calls the script callback" do
+      @script.class.set_callback :script, :before do
+        step.should == nil
+      end
+      
+      @script.class.set_callback :script, :after do
+        step.should == steps[-1]
+      end
+      
+      @script.class.set_callback :script, :around do |&block|
+        step.should == nil
+        block.yield
+        step.should == steps[-1]
+      end
+      
+      @script.run
+    end
+    
+    it "calls the step callback" do
+      @script.class.set_callback :step, :before do
+        session.current_url.should == ""
+        step.should == steps[0]
+      end
+      
+      @script.class.set_callback :step, :after do
+        session.current_url.should == "http://www.google.com/"
+        step.should == steps[0]
+      end
+      
+      @script.class.set_callback :step, :around do |&block|
+        session.current_url.should == ""
+        block.yield
+        session.current_url.should == "http://www.google.com/"
+      end
+      
+      @script.run
+    end
+    
+    describe "cancel" do
+      before do
+        @script.class.set_callback :step, :after do
+          raise Capybara::Script::Cancel.new
+        end
+      end
+      
+      it "sets an error on the script" do
+        @script.error.should be_nil
+        @script.run
+        @script.error.should_not be_nil
+      end
+      
+      it "calls the cancel callback" do
+        @script.should_receive(:after_cancel)
+        @script.run
+      end
     end
   end
   
