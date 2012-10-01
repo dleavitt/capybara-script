@@ -4,6 +4,11 @@ describe Capybara::Script do
   describe "callbacks" do
     before do
       class TestScript < Capybara::Script
+        def initialize(steps, options = {})
+          options[:session] = Capybara::Session.new :rack_test, TestApp
+          super steps, options
+        end
+        
         set_callback :script, :around,  :around_script
         set_callback :step,   :around,  :around_step
         set_callback :cancel, :after,   :after_cancel
@@ -20,9 +25,7 @@ describe Capybara::Script do
         end
       end
       
-      @script = TestScript.new([[:visit, {:url => "http://www.google.com/"}]])
-      
-      
+      @script = TestScript.new([[:visit, {:url => "/"}]])
     end
     
     it "calls the script callback" do
@@ -50,14 +53,14 @@ describe Capybara::Script do
       end
       
       @script.class.set_callback :step, :after do
-        session.current_url.should == "http://www.google.com/"
+        session.current_url.should == "http://www.example.com/"
         step.should == steps[0]
       end
       
       @script.class.set_callback :step, :around do |&block|
         session.current_url.should == ""
         block.yield
-        session.current_url.should == "http://www.google.com/"
+        session.current_url.should == "http://www.example.com/"
       end
       
       @script.run
@@ -80,18 +83,6 @@ describe Capybara::Script do
         @script.should_receive(:after_cancel)
         @script.run
       end
-    end
-  end
-  
-  describe Capybara::Script::Steps::Check do
-    it "checks the box" do
-      script = run_steps [
-        [:visit,      {:url => "http://dleavitt-test.s3.amazonaws.com/within_spec.html"}],
-        [:check,      {:selector => "Checkbox Test"}],
-        [:click_on,   {:selector => "submit_checkbox"}],
-      ]
-      
-      script.session.current_url.split('?')[-1].should eq "checkbox_test=1"
     end
   end
 end

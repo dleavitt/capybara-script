@@ -19,6 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency      %q<capybara>,             ["~> 1.1"]
   gem.add_development_dependency  %q<rspec>,                ["~> 2.10"]
   gem.add_development_dependency  %q<capybara-webkit>,      ["~> 0.12"]
+  gem.add_development_dependency  "sinatra"
   gem.add_development_dependency  %q<rake>,                 ["~> 0.9"]
   gem.add_development_dependency  %q<rspec>,                ["~> 2.10"]
   gem.add_development_dependency  %q<pry>,                  ["~> 0.9"]

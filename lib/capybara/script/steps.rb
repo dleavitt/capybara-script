@@ -83,6 +83,38 @@ module Capybara
           @session.check params[:selector]
         end
       end
+      
+      class Uncheck < DOMAction
+        register_step
+        
+        def do_run
+          @session.uncheck params[:selector]
+        end
+      end
+      
+      class Choose < DOMAction
+        register_step
+        
+        def do_run
+          @session.choose params[:selector]
+        end
+      end
+      
+      class Select < DOMAction
+        register_step
+        
+        def do_run
+          @session.select params[:value], :from => params[:selector]
+        end
+      end
+      
+      class Unselect < DOMAction
+        register_step
+        
+        def do_run
+          @session.unselect params[:value], :from => params[:selector]
+        end
+      end
     end
   end
 end

@@ -12,10 +12,11 @@ module Capybara
     
     define_callbacks :script, :step, :cancel
   
-    def initialize(step_data)
+    def initialize(step_data, options = {})
       @steps_data = step_data
       # TODO: option to pass existing session?
-      @session = Capybara::Session.new(:webkit)
+      @session = options[:session] || Capybara::Session.new(:webkit)
+      
       @steps = @steps_data.map { |name, params| Steps.definitions[name].new(session, params) }
     end
 
